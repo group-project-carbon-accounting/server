@@ -6,6 +6,8 @@ class Transaction:
 
 class CarbonTransaction(Transaction):
 
+    UNKNOWN_CARBON_FOOTPRINT = 2147483647 # 2^31 - 1
+
     def __init__(self, amount, vendor, date_time, carbon_footprint, input_method, confidence):
         super().__init__(amount, vendor, date_time)
         self.carbon_footprint = carbon_footprint
@@ -18,7 +20,7 @@ class CarbonTransaction(Transaction):
 
         A confidence of zero would indicate that the footprint is obtained from some generic uniform distribution.
         :param int carbon_footprint: updated footprint
-        :param int input_method: method through which the updated footprint was generated. Assume the integer associated with the method has been registered first in a database table where it is the primary key, among other attributes. 
+        :param int input_method: method through which the updated footprint was generated. Assume the integer associated with the method has been registered first in a database table where it is the primary key, among other attributes.
         :param int confidence: confidence of the updated footprint
         :return bool: whether the footprint has been updated
         """

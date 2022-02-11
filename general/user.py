@@ -1,5 +1,4 @@
-import uuid
-
+from account import Account
 
 class User:
 
@@ -9,14 +8,11 @@ class User:
         self.email = email
         self.accounts = accounts
 
-    def add_account(self, account_class):
-        """
-        Add a new, empty account of the specified account class to the user assuming that all the user's accounts have been included in the list.
-        :param :class:`account.Account` account_class: the class of account to be added
-        :return: None
-        """
-        self.accounts.append(account_class.create_new_account(len(self.accounts)))
+    def add_account(self):
+        self.accounts.append(Account.create_new_account())
 
     @classmethod
     def create_new_user(cls, username, email):
-        return cls(uuid.uuid4().int, username, email, [])
+        user_id = 0
+        # This should be the value from 'INSERT INTO user (...) VALUES(...) RETURNING user_id'
+        return cls(user_id, username, email, [])

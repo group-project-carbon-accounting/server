@@ -6,11 +6,7 @@ class Account:
         self.transactions = transactions
 
     @classmethod
-    def create_new_account(cls, account_number):
+    def create_new_account(cls):
+        account_number = 0
+        # This should be the value from 'INSERT INTO account (...) VALUES(...) RETURNING account_number'
         return cls(account_number, 0, [])
-
-class CreditAccount(Account):
-    pass
-
-class CarbonAccount(Account):
-    pass
