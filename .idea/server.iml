@@ -6,10 +6,13 @@
       <sourceFolder url="file://$MODULE_DIR$/input" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/offset" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/transaction" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/user" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/general" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests" isTestSource="true" />
     </content>
     <orderEntry type="jdk" jdkName="3.8 @ Ubuntu" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+  <component name="PackageRequirementsSettings">
+    <option name="requirementsPath" value="" />
   </component>
 </module>
