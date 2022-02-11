@@ -1,3 +1,4 @@
+import general_handlers
 from account import Account
 
 class User:
@@ -8,11 +9,8 @@ class User:
         self.email = email
         self.accounts = accounts
 
-    def add_account(self):
-        self.accounts.append(Account.create_new_account())
 
     @classmethod
     def create_new_user(cls, username, email):
-        user_id = 0
         # This should be the value from 'INSERT INTO user (...) VALUES(...) RETURNING user_id'
-        return cls(user_id, username, email, [])
+        return cls(general_handlers.create_new_user(username, email), username, email, [])

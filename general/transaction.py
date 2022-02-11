@@ -1,5 +1,9 @@
+import general_handlers
+
+
 class Transaction:
-    def __init__(self, amount, vendor, date_time):
+    def __init__(self, transaction_id, amount, vendor, date_time):
+        self.transaction_id = transaction_id
         self.amount = amount
         self.vendor = vendor
         self.date_time = date_time
@@ -8,8 +12,8 @@ class CarbonTransaction(Transaction):
 
     UNKNOWN_CARBON_FOOTPRINT = 2147483647 # 2^31 - 1
 
-    def __init__(self, amount, vendor, date_time, carbon_footprint, input_method, confidence):
-        super().__init__(amount, vendor, date_time)
+    def __init__(self, transaction_id, amount, vendor, date_time, carbon_footprint, input_method, confidence):
+        super().__init__(transaction_id, amount, vendor, date_time)
         self.carbon_footprint = carbon_footprint
         self.input_method = input_method
         self.confidence = confidence
@@ -28,5 +32,6 @@ class CarbonTransaction(Transaction):
             self.carbon_footprint = carbon_footprint
             self.input_method = input_method
             self.confidence = confidence
+            general_handlers.refine_transaction_footprint(self.transaction_id, carbon_footprint, input_method, confidence)
             return True
         return False

@@ -1,3 +1,5 @@
+import general_handlers
+
 class Account:
 
     def __init__(self, account_number, balance, transactions):
@@ -6,7 +8,6 @@ class Account:
         self.transactions = transactions
 
     @classmethod
-    def create_new_account(cls):
-        account_number = 0
+    def create_new_account(cls, user):
         # This should be the value from 'INSERT INTO account (...) VALUES(...) RETURNING account_number'
-        return cls(account_number, 0, [])
+        return cls(general_handlers.create_new_account(user), 0, [])
