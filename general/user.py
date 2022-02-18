@@ -11,6 +11,6 @@ class User:
 
 
     @classmethod
-    def create_new_user(cls, username, email):
+    async def create_new_user(cls, username, email):
         # This should be the value from 'INSERT INTO user (...) VALUES(...) RETURNING user_id'
-        return cls(general_handlers.create_new_user(username, email), username, email, [])
+        return cls(await general_handlers.create_new_user(username, email), username, email, [])

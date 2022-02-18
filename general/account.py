@@ -8,6 +8,6 @@ class Account:
         self.transactions = transactions
 
     @classmethod
-    def create_new_account(cls, user):
+    async def create_new_account(cls, user, account_type):
         # This should be the value from 'INSERT INTO account (...) VALUES(...) RETURNING account_number'
-        return cls(general_handlers.create_new_account(user), 0, [])
+        return cls(await general_handlers.create_new_account(user, account_type), 0, [])
