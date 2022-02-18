@@ -1,5 +1,4 @@
 import general_handlers
-from account import Account
 
 class User:
 
