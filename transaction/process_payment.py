@@ -27,8 +27,7 @@ async def process_payment(account_id, amount, vendor, footprint, confidence):
     except GeneralHandlerError as e:
         return str(e)
     else:
-        # TODO: change input_method and confidence to dictionary in input_footprint
-        # TODO: add 1-to-1 mapping from error code to error
+        # TODO: change input_method to dictionary in input_footprint
         # TODO: return status code, and call a blackbox payment function
         try:
             footprint_transaction_id = await general_handlers.add_footprint_transaction(footprint_account_id, footprint, timestamp, cash_transaction_id, 0, confidence)

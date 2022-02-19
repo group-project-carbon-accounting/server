@@ -1,10 +1,8 @@
 
-class GeneralHandlerError:
+class GeneralHandlerError(Exception):
     def __init__(self, function, request_dict):
         self.function = function
         self.request_dict = request_dict
-
-# TODO: add __str__
 
 class DatabaseTransactionError(GeneralHandlerError):
     pass
