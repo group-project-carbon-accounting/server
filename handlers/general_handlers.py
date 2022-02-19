@@ -1,94 +1,80 @@
 import json
-from error import *
+from general_handler_error import *
 from tornado.httpclient import AsyncHTTPClient, HTTPRequest
 
 URL = '127.0.0.1:8888'
-DATABASE_ERROR = 0
+
+
+async def async_fetch(function, url_suffix, request_dict):
+    http_client = AsyncHTTPClient()
+    response = await http_client.fetch(HTTPRequest(url=URL + url_suffix, method='POST', body=json.dumps(request_dict)))
+    data = json.loads(response.body)
+    if data['status_code'] != 0:
+        raise STATUS_CODE_ERROR_DICTIONARY[data['status_code']](function, request_dict)
+    return data
+
 
 async def create_new_user(username, email):
-    http_client = AsyncHTTPClient()
-    response = await http_client.fetch(HTTPRequest(url=URL + '/user/create', method='POST', body=json.dumps({
+    data = await async_fetch(create_new_user, '/user/create', {
         'username': username,
         'email': email
-    })))
-    user_id = json.loads(response.body)['user_id']
-    if user_id == DATABASE_ERROR:
-        raise DatabaseTransactionError(create_new_account)
-    else:
-        return user_id
+    })
+    return data['user_id']
 
 
 async def create_new_account(user, account_type):
-    http_client = AsyncHTTPClient()
-    response = await http_client.fetch(HTTPRequest(url=URL + '/account/create', method='POST', body=json.dumps({
+    data = await async_fetch(create_new_user, '/account/create', {
         'user': user,
         'account_type': account_type
-    })))
-    account_number = json.loads(response.body)['account_number']
-    if account_number == DATABASE_ERROR:
-        raise DatabaseTransactionError(create_new_account)
-    else:
-        return account_number
+    })
+    return data['account_id']
 
 
-async def add_cash_transaction(account_number, amount, date_time, vendor):
-    http_client = AsyncHTTPClient()
-    response = await http_client.fetch(HTTPRequest(url=URL + '/transaction/add', method='POST', body=json.dumps({
-        'account_number': account_number,
+async def add_cash_transaction(account_id, amount, timestamp, vendor):
+    data = await async_fetch(create_new_user, '/transaction/add_cash', {
+        'account_id': account_id,
         'amount': amount,
-        'date_time': date_time,
+        'timestamp': timestamp,
         'vendor': vendor
-    })))
-    transaction_id = json.loads(response.body)['transaction_id']
-    if transaction_id == DATABASE_ERROR:
-        raise DatabaseTransactionError(add_cash_transaction)
-    else:
-        return transaction_id
+    })
+    return data['transaction_id']
 
 
-async def add_footprint_transaction(footprint_account_number, footprint, date_time, associated_transaction_id, input_method,
-                                    confidence):
-    http_client = AsyncHTTPClient()
-    response = await http_client.fetch(
-        HTTPRequest(url=URL + '/transaction/add_footprint', method='POST', body=json.dumps({
-            'footprint_account_number': footprint_account_number,
-            'footprint': footprint,
-            'date_time': date_time,
-            'associated_transaction_id': associated_transaction_id,
-            'input_method': input_method,
-            'confidence': confidence
-        })))
-    transaction_id = json.loads(response.body)['transaction_id']
-    if transaction_id == DATABASE_ERROR:
-        raise DatabaseTransactionError(add_footprint_transaction)
-    else:
-        return transaction_id
+async def add_footprint_transaction(footprint_account_id, footprint, timestamp, associated_transaction_id,
+                                    input_method, confidence):
+    data = await async_fetch(create_new_user, '/transaction/add_footprint', {
+        'footprint_account_id': footprint_account_id,
+        'footprint': footprint,
+        'timestamp': timestamp,
+        'associated_transaction_id': associated_transaction_id,
+        'input_method': input_method,
+        'confidence': confidence
+    })
+    return data['transaction_id']
 
 
-async def add_offset_transaction(offset_account_number, offset, date_time, offset_cost, offset_method):
-    http_client = AsyncHTTPClient()
-    response = await http_client.fetch(HTTPRequest(url=URL + '/transaction/add_offset', method='POST', body=json.dumps({
-        'offset_account_number': offset_account_number,
+async def add_offset_transaction(offset_account_id, offset, timestamp, offset_cost, offset_method):
+    data = await async_fetch(create_new_user, '/transaction/add_offset', {
+        'offset_account_id': offset_account_id,
         'offset': offset,
-        'date_time': date_time,
+        'timestamp': timestamp,
         'offset_cost': offset_cost,
         'offset_method': offset_method,
-    })))
-    transaction_id = json.loads(response.body)['transaction_id']
-    if transaction_id == DATABASE_ERROR:
-        raise DatabaseTransactionError(add_offset_transaction)
-    else:
-        return transaction_id
+    })
+    return data['transaction_id']
 
 
 async def refine_footprint_transaction(transaction_id, footprint, input_method, confidence):
-    http_client = AsyncHTTPClient()
-    response = await http_client.fetch(
-        HTTPRequest(url=URL + '/transaction/refine_footprint', method='POST', body=json.dumps({
-            'transaction_id': transaction_id,
-            'footprint': footprint,
-            'input_method': input_method,
-            'confidence': confidence
-        })))
-    if not json.loads(response.body)['success']:
-        raise DatabaseTransactionError(refine_footprint_transaction)
+    await async_fetch(create_new_user, '/transaction/refine_footprint', {
+        'transaction_id': transaction_id,
+        'footprint': footprint,
+        'input_method': input_method,
+        'confidence': confidence
+    })
+
+async def get_associated_footprint_account_id(account_id):
+    data = await async_fetch(get_associated_footprint_account_id, '/account/get_associated_footprint_account_id', {
+        'account_id': account_id
+    })
+    return data['account_id']
+

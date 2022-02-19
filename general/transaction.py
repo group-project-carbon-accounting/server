@@ -3,21 +3,21 @@ import general_handlers
 UNKNOWN_FOOTPRINT = 2147483647 # 2^31 - 1
 
 class Transaction:
-    def __init__(self, transaction_id, amount, date_time):
+    def __init__(self, transaction_id, amount, timestamp):
         self.transaction_id = transaction_id
         self.amount = amount
-        self.date_time = date_time
+        self.timestamp = timestamp
 
 
 class CashTransaction(Transaction):
-    def __init__(self, transaction_id, amount, date_time, vendor):
-        super().__init__(transaction_id, amount, date_time)
+    def __init__(self, transaction_id, amount, timestamp, vendor):
+        super().__init__(transaction_id, amount, timestamp)
         self.vendor = vendor
 
 
 class FootprintTransaction(Transaction):
-    def __init__(self, transaction_id, footprint, date_time, associated_transaction_id, input_method, confidence):
-        super().__init__(transaction_id, footprint, date_time)
+    def __init__(self, transaction_id, footprint, timestamp, associated_transaction_id, input_method, confidence):
+        super().__init__(transaction_id, footprint, timestamp)
         self.associated_transaction_id = associated_transaction_id
         self.input_method = input_method
         self.confidence = confidence
@@ -42,7 +42,7 @@ class FootprintTransaction(Transaction):
 
 
 class OffsetTransaction(Transaction):
-    def __init__(self, transaction_id, offset, date_time, offset_cost, offset_method):
-        super().__init__(transaction_id, offset, date_time)
+    def __init__(self, transaction_id, offset, timestamp, offset_cost, offset_method):
+        super().__init__(transaction_id, offset, timestamp)
         self.offset_cost = offset_cost
         self.offset_method = offset_method
