@@ -6,6 +6,8 @@ from tornado import httpclient
 import tornado
 import json
 from handlers.product_handlers import AddProductHandler, UpdateProductHandler, GetProductHandler
+from handlers.entity_handlers import GetEntityHandler
+from handlers.transaction_handlers import TransactionGetRecentHandler
 
 class MainHandler(tornado.web.RequestHandler) :
     def post(self):
@@ -45,20 +47,12 @@ class UpdateTransactionHandler(tornado.web.RequestHandler):
         response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/purchase/update", method = 'POST', body = self.request.body)
         self.write(response.body)
 
-class GetEntityHandler(tornado.web.RequestHandler) :
-    async def get(self, user_id):
-        response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/entity/get/" + str(user_id) , method = 'GET')
-        self.write(response.body)
-
-class GetRecentTransactionHandler(tornado.web.RequestHandler):
-    async def get(self, user_id, x):
-        self.write("Hello world")
 
 app = Application ([
-    #(r'/test', MainHandler),  
+    (r'/test', MainHandler),  
     (r'/transaction/add', AddTransactionHandler),
     (r'/transaction/get/(?P<prch_id>[0-9]*)', GetTransactionHandler),
-    (r'/transaction/get_recent/(?P<user_id>[0-9]*)/(?P<x>[0-9]*)', GetRecentTransactionHandler),
+    (r'/transaction/get_recent/(?P<user_id>[0-9]*)/(?P<num_of_days>[0-9]*)', TransactionGetRecentHandler),
     (r'/transaction/update', UpdateTransactionHandler), 
     (r'/product/add', AddProductHandler), 
     (r'/product/update', UpdateProductHandler), 
