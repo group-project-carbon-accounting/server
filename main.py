@@ -13,9 +13,28 @@ class MainHandler(tornado.web.RequestHandler) :
         data = json.loads(self.request.body)
         self.write(str(data['test']))
 
+async def calculateCarbonCost(x):
+    x = json.loads(x)
+    if (x['item_list']):
+        for key in x['item_list'] :
+            response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/product/get/" + str(key['comp_id']) + "/" + str(key['prod_id']), method = 'GET')
+            return response.body['carbon_cost']
+
+
 class AddTransactionHandler(tornado.web.RequestHandler) :
     async def post(self):
         response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/purchase/add", method = 'POST', body = self.request.body)
+        data = json.loads(self.request.body)
+        carbon = 0
+        if (data['item_list']) :
+            for key in data['item_list'] :
+                response1 = await httpclient.AsyncHTTPClient().fetch("http://localhost:8889/product/get/" + str(key['comp_id']) + "/" + str(key['prod_id']), method = 'GET')
+                details = json.loads(response1.body)
+                carbon += details['carbon_cost']
+        entityResponse = await httpclient.AsyncHTTPClient().fetch("http://localhost:8889/entity/get/" + str(data['buyr_id']), method = 'GET')
+        entityDetails = json.loads(entityResponse.body)
+        entityDetails['carbon_cost'] += carbon
+        newEntityResponse = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/entity/update", method = 'POST', body = json.dumps(entityDetails))
         self.write(response.body)
 
 class CreateUserHandler(tornado.web.RequestHandler) :
@@ -57,6 +76,11 @@ class GetRecentTransactionHandler(tornado.web.RequestHandler):
     async def get(self, user_id, x):
         self.write("Hello world")
 
+class GetProductHandler(tornado.web.RequestHandler):
+    async def get(self, comp_id, prod_id):
+        response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/product/get/" + str(comp_id) +"/" + str(prod_id), method = 'GET')
+        self.write(response.body)
+
 db = SQLAlchemy("postgresql://postgres:postgres@localhost:5432/db")
 
 
@@ -70,6 +94,7 @@ app = Application ([
     (r'/transaction/update', UpdateTransactionHandler), 
     (r'/product/add', AddProductHandler), 
     (r'/product/update', UpdateProductHandler), 
+    (r'/product/get/(?P<comp_id>[0-9]*)/(?P<prod_id>[0-9]*)', GetProductHandler),
     (r'/entity/get/(?P<user_id>[0-9]*)', GetEntityHandler)
 ])
 
