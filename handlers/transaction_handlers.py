@@ -22,9 +22,28 @@ class TransactionGetRecentHandler(RequestHandler):
         # add 60 seconds just in case of high latency
         ts_now = int(time.time()) + 60
         ts_past = ts_now - int(num_of_days) * 86400 if int(num_of_days) != 0 else 0
-        response_data = await async_fetch('/entity/get/' + user_id + '?start_ts=' + str(ts_now) +
-                                          '&end_ts=' + str(ts_past), GET)
-        print(json.dumps(response_data))
+        response_data = await async_fetch('/entity/purchases/get/' + user_id + '?start_ts=' + str(ts_past) +
+                                          '&end_ts=' + str(ts_now), GET)
+        data = {
+            'carbon_cost': 0,
+            'carbon_offset': 0,
+            'transactions': []
+        }
+        for purchase in response_data['purchase_list']:
+            c = purchase['carbon_cost']
+            if c >= 0:
+                data['carbon_cost'] += c
+            else:
+                data['carbon_offset'] += c
+            data['transactions'].append({
+                'transaction_id': purchase['id'],
+                'price': purchase['price'],
+                'carbon_cost_offset': purchase['carbon_cost'],
+                # TODO: query database to see what's the name of the vendor corresponding to that selr_id
+                'vendor': purchase['selr_id'],
+                'timestamp': int(purchase['ts'])
+            })
+        self.write(json.dumps(data))
 
 
 
