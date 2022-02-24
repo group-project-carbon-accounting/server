@@ -66,7 +66,7 @@ app = Application ([
     (r'/account/create', CreateAccountHandler), 
     (r'/transaction/add', AddTransactionHandler),
     (r'/transaction/get/(?P<prch_id>[0-9]*)', GetTransactionHandler),
-    (r'/transaction/get_recent/(?P<user_id>[0-9]*)/(?P<x>[0-9]*)', GetRecentTransactionHandler)
+    (r'/transaction/get_recent/(?P<user_id>[0-9]*)/(?P<x>[0-9]*)', GetRecentTransactionHandler),
     (r'/transaction/update', UpdateTransactionHandler), 
     (r'/product/add', AddProductHandler), 
     (r'/product/update', UpdateProductHandler), 
