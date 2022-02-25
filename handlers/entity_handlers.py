@@ -1,7 +1,7 @@
-import tornado
-from tornado import httpclient
+import tornado.web
+from async_fetch import async_fetch, GET, POST
 
-class GetEntityHandler(tornado.web.RequestHandler) :
+class EntityGetHandler(tornado.web.RequestHandler) :
     async def get(self, user_id):
-        response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/entity/get/" + str(user_id) , method = 'GET')
+        response = await async_fetch('/entity/get/' + user_id, method=GET)
         self.write(response.body)

@@ -1,17 +1,17 @@
-import tornado
-from tornado import httpclient
+import tornado.web
+from async_fetch import async_fetch, GET, POST
 
-class AddProductHandler(tornado.web.RequestHandler):
+class ProductAddHandler(tornado.web.RequestHandler):
     async def post(self):
-        response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/product/add", method = 'POST', body = self.request.body)
+        response = await async_fetch('/product/add', method=POST, data=self.request.body)
         self.write(response.body)
 
-class UpdateProductHandler(tornado.web.RequestHandler):
+class ProductUpdateHandler(tornado.web.RequestHandler):
     async def post(self):
-        response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/product/update", method = 'POST', body = self.request.body)
+        response = await async_fetch('/product/update', method=POST, data=self.request.body)
         self.write(response.body)
 
-class GetProductHandler(tornado.web.RequestHandler):
+class ProductGetHandler(tornado.web.RequestHandler):
     async def get(self, comp_id, prod_id):
-        response = await httpclient.AsyncHTTPClient().fetch("http://localhost:8888/product/get/" + str(comp_id) +"/" + str(prod_id), method = 'GET')
+        response = await async_fetch('/product/get/' + comp_id + '/' + prod_id, method=GET)
         self.write(response.body)
