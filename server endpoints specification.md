@@ -94,3 +94,29 @@ If `transaction_id` is 0, then that means that the offsetting transaction has fa
 }
 ```
 Carbon offsetting transactions may NOT be updated, hence `carbon_cost_offset` would always be positive.
+
+### `transaction/update_products`
+
+*POST*
+
+**Request**:
+```json
+{
+	"transaction_id": *,
+	"products":
+	[
+		{
+			"company_id": *,
+			"product_id": *
+		},
+		...
+	]
+}
+```
+
+**Response**:
+```json
+{
+	"success": true/false
+}
+```
