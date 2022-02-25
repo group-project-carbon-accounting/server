@@ -31,7 +31,7 @@ if the `{num_of_days}` field is 0, then get the lifetime data.
 ```
 Here `carbon_cost_offset` would be negative for an offsetting transaction.
 
-### `offset/get_prices`
+### `offset/get`
 
 *GET*
 
