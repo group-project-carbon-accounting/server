@@ -34,10 +34,26 @@ class TransactionGetRecentHandler(tornado.web.RequestHandler):
         self.write(json.dumps(data))
 
 
+class TransactionUpdateHandler(tornado.web.RequestHandler):
+    async def post(self):
+        request_data = json.loads(self.request.body)
+        # if the old or updated value is negative, then abort
+        if request_data['carbon_cost'] < 0:
+            self.write(json.dumps({'success': False}))
+        transaction_data = await async_fetch('/purchase/get/' + str(request_data['transaction_id']), GET)
+        if transaction_data['carbon_cost'] < 0:
+            self.write(json.dumps({'success': False}))
+        else:
+            transaction_data['prch_id'] = request_data['transaction_id']
+            transaction_data['carbon_cost'] = request_data['carbon_cost']
+            await async_fetch('/purchase/update', POST, data=transaction_data)
+            self.write(json.dumps({'success': True}))
+
 
 # TODO: move this to separate test module
 app = tornado.web.Application([
-        ('/transaction/get_recent/(?P<user_id>[0-9]+)/(?P<num_of_days>[0-9]+)', TransactionGetRecentHandler)
+        ('/transaction/get_recent/(?P<user_id>[0-9]+)/(?P<num_of_days>[0-9]+)', TransactionGetRecentHandler),
+        ('/transaction/update', TransactionUpdateHandler),
     ])
 
 if __name__ == '__main__':
