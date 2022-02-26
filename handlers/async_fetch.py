@@ -17,3 +17,13 @@ async def async_get_product_data(product, carbon_cost_sum):
         raise Exception
     carbon_cost_sum[0] += product_data['carbon_cost']
     return product_data
+
+async def async_get_offset_options(offset_company_id, offset_description, offset_product_id):
+    product_data = await async_fetch('/product/get/' + str(offset_company_id) + '/' + str(offset_product_id), GET)
+    company_data = await async_fetch('/entity/get/' + str(offset_company_id), GET)
+    return {
+        'vendor_id': offset_company_id,
+        'vendor': company_data['display_name'],
+        'description': offset_description,
+        'price': product_data['carbon_cost']
+    }
