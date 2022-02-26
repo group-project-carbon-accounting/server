@@ -1,9 +1,8 @@
 import asyncio
 import json
 import time
-
 import tornado.web, tornado.ioloop
-from handlers.async_fetch import async_fetch, GET, POST
+from handlers.async_fetch import async_fetch, GET, POST, async_get_product_data
 
 class TransactionGetHandler(tornado.web.RequestHandler):
     async def get(self, transaction_id):
@@ -80,13 +79,6 @@ class TransactionUpdateHandler(tornado.web.RequestHandler):
                     response_data_1['carbon_cost'] += (request_data['carbon_cost_offset'] - old_carbon_cost)
                     await async_fetch('/entity/update', POST, data=response_data_1)
 
-async def get_product_data(product, carbon_cost_sum):
-    product_data = await async_fetch('/product/get/' + str(product['company_id']) + '/' + str(product['product_id']), GET)
-    if product_data['carbon_cost'] < 0:
-        raise Exception
-    carbon_cost_sum[0] += product_data['carbon_cost']
-    return product_data
-
 
 class TransactionUpdateProductsHandler(tornado.web.RequestHandler):
     async def post(self):
@@ -97,9 +89,9 @@ class TransactionUpdateProductsHandler(tornado.web.RequestHandler):
             self.write(json.dumps({'success': False}))
         else:
             carbon_cost = [0]
-            product_tasks = [get_product_data(product, carbon_cost) for product in request_data['products']]
+            product_tasks = [async_get_product_data(product, carbon_cost) for product in request_data['products']]
             try:
-                # if any product is an offsetting one
+                # if any product is an offsetting one, raise Exception
                 await asyncio.wait(product_tasks, return_when=asyncio.FIRST_EXCEPTION)
             except Exception:
                 self.write(json.dumps({'success': False}))
