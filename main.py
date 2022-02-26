@@ -1,6 +1,5 @@
-from tornado.ioloop import IOLoop
-from handlers import entity_handlers, offset_handlers, payment_handlers, product_handlers, transaction_handlers
-import tornado.web
+from handlers import user_handlers, offset_handlers, payment_handlers, product_handlers, transaction_handlers
+import tornado.web, tornado.ioloop
 import json
 
 
@@ -14,22 +13,26 @@ class TestHandler(tornado.web.RequestHandler):
     def get(self, test):
         self.write(test)
 
-# TODO: implement these handlers
-'''
-(r'/product/add', AddProductHandler), 
-(r'/product/update', UpdateProductHandler), 
-(r'/product/get/(?P<comp_id>[0-9]*)/(?P<prod_id>[0-9]*)', GetProductHandler),
-(r'/entity/get/(?P<user_id>[0-9]*)', GetEntityHandler)
-'''
 
 if __name__ == '__main__':
     app = tornado.web.Application([
         ('/test', TestHandler),
         ('/test/(?P<test>.*)', TestHandler),
+        # App endpoints
+        ('/user/get/(?P<user_id>[0-9]+)', user_handlers.UserGetHandler),
         ('/transaction/get/(?P<transaction_id>[0-9]+)', transaction_handlers.TransactionGetHandler),
         ('/transaction/get_recent/(?P<user_id>[0-9]+)/(?P<num_of_days>[0-9]+)',
          transaction_handlers.TransactionGetRecentHandler),
         ('/transaction/update', transaction_handlers.TransactionUpdateHandler),
+        ('/transaction/update_products', transaction_handlers.TransactionUpdateProductsHandler),
+        ('/offset/get', offset_handlers.OffsetGetHandler),
+        ('/offset/offset', offset_handlers.OffsetOffsetHandler),
+        # Company endpoints
+        ('/product/add', product_handlers.ProductAddHandler),
+        ('/product/update', product_handlers.ProductUpdateHandler),
+        ('/product/get/(?P<company_id>[0-9]+)/(?P<product_id>[0-9]+)', product_handlers.ProductGetHandler),
+        # Payment endpoints
+        ('/payment', payment_handlers.PaymentProcessHandler)
     ])
     app.listen(8889)
     tornado.ioloop.IOLoop.current().start()

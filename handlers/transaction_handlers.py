@@ -1,7 +1,9 @@
+import asyncio
 import json
 import time
+
 import tornado.web, tornado.ioloop
-from async_fetch import async_fetch, GET, POST
+from handlers.async_fetch import async_fetch, GET, POST
 
 class TransactionGetHandler(tornado.web.RequestHandler):
     async def get(self, transaction_id):
@@ -53,11 +55,69 @@ class TransactionUpdateHandler(tornado.web.RequestHandler):
         # if the old or updated value is negative, then abort
         if request_data['carbon_cost_offset'] < 0:
             self.write(json.dumps({'success': False}))
+        else:
+            transaction_data = await async_fetch('/purchase/get/' + str(request_data['transaction_id']), GET)
+            if transaction_data['carbon_cost'] < 0:
+                self.write(json.dumps({'success': False}))
+            else:
+                transaction_data['prch_id'] = request_data['transaction_id']
+                old_carbon_cost = transaction_data['carbon_cost']
+                transaction_data['carbon_cost'] = request_data['carbon_cost_offset']
+                response_data = await async_fetch('/purchase/update', POST, data=transaction_data)
+
+                if response_data['status'] != 'success':
+                    self.write(json.dumps({'success': False}))
+                else:
+                    # this is successful whether the entity was updated or not, since the transaction has already been updated
+                    # and transactions are the canonical records. Again, the redundant data in entity may be out of sync.
+                    self.write(json.dumps({'success': True}))
+
+                    # TODO: fix concurrency issue; if transactions are concurrent, then race conditions can occur,
+                    #       and the carbon cost and offset value can be different from the sum of transactions as in
+                    #       TransactionGetRecentHandler
+
+                    response_data_1 = await async_fetch('/entity/get/' + str(transaction_data['buyr_id']), GET)
+                    response_data_1['carbon_cost'] += (request_data['carbon_cost_offset'] - old_carbon_cost)
+                    await async_fetch('/entity/update', POST, data=response_data_1)
+
+async def get_product_data(product, carbon_cost_sum):
+    product_data = await async_fetch('/product/get/' + str(product['company_id']) + '/' + str(product['product_id']), GET)
+    if product_data['carbon_cost'] < 0:
+        raise Exception
+    carbon_cost_sum[0] += product_data['carbon_cost']
+    return product_data
+
+
+class TransactionUpdateProductsHandler(tornado.web.RequestHandler):
+    async def post(self):
+        request_data = json.loads(self.request.body)
         transaction_data = await async_fetch('/purchase/get/' + str(request_data['transaction_id']), GET)
+
         if transaction_data['carbon_cost'] < 0:
             self.write(json.dumps({'success': False}))
         else:
-            transaction_data['prch_id'] = request_data['transaction_id']
-            transaction_data['carbon_cost'] = request_data['carbon_cost_offset']
-            await async_fetch('/purchase/update', POST, data=transaction_data)
-            self.write(json.dumps({'success': True}))
+            carbon_cost = [0]
+            product_tasks = [get_product_data(product, carbon_cost) for product in request_data['products']]
+            try:
+                # if any product is an offsetting one
+                await asyncio.wait(product_tasks, return_when=asyncio.FIRST_EXCEPTION)
+            except Exception:
+                self.write(json.dumps({'success': False}))
+            else:
+                products = [{'prod_id': product['product_id'], 'comp_id': product['company_id']}
+                            for product in request_data['products']]
+                transaction_data['item_list'] = products
+                old_carbon_cost = transaction_data['carbon_cost']
+                transaction_data['carbon_cost'] = carbon_cost[0]
+                transaction_data['prch_id'] = transaction_data['id']
+                del(transaction_data['id'])
+                response_data = await async_fetch('/purchase/update', POST, data=transaction_data)
+                if response_data['status'] != 'success':
+                    self.write(json.dumps({'success': False}))
+                else:
+                    self.write(json.dumps({'success': True}))
+
+                    response_data_1 = await async_fetch('/entity/get/' + str(transaction_data['buyr_id']), GET)
+                    response_data_1['carbon_cost'] += (carbon_cost[0] - old_carbon_cost)
+                    await async_fetch('/entity/update', POST, data=response_data_1)
+

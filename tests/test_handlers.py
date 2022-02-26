@@ -4,7 +4,7 @@ import tornado.testing
 import tornado.web
 import sys
 sys.path.insert(0, '/Users/riya/Documents/Part 1B/Group Project/server')
-from handlers.entity_handlers import GetEntityHandler
+from handlers.user_handlers import GetEntityHandler
 from handlers.product_handlers import AddProductHandler, GetProductHandler, UpdateProductHandler
 from main import MainHandler, AddTransactionHandler, GetTransactionHandler, UpdateTransactionHandler
 from handlers.transaction_handlers import TransactionGetRecentHandler
