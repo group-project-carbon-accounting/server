@@ -1,6 +1,47 @@
 # Server endpoints specification
 
-### `transaction/get_recent/{user_id}/{num_of_days}`
+### `/user/get/{user_id}`
+
+*GET*
+
+**Response**:
+```json
+{
+	"name": *,
+	"carbon_cost": *,
+	"carbon_offset": *
+}
+```
+
+The `carbon_cost` and `carbon_offset` provided here could be incorrect *if* there are concurrent transactions. For the working example, however, they will be working correctly to give the lifetime values.
+
+### `/transaction/get/{transaction_id}`
+
+*GET*
+
+e.g. `transaction/get/12`
+
+**Response**:
+```json
+{
+	"price": *,
+	"carbon_cost_offset": *,
+	"vendor": *,
+	"timestamp": *,
+	"products":
+	[
+		{
+			"company_name": *,
+			"product_name": *,
+		},
+		{
+			...
+		},
+		...
+	]
+}
+```
+### `/transaction/get_recent/{user_id}/{num_of_days}`
 
 *GET*
 
@@ -31,7 +72,7 @@ if the `{num_of_days}` field is 0, then get the lifetime data.
 ```
 Here `carbon_cost_offset` would be negative for an offsetting transaction.
 
-### `offset/get`
+### `/offset/get`
 
 *GET*
 
@@ -49,7 +90,7 @@ Here `carbon_cost_offset` would be negative for an offsetting transaction.
 ```
 This is a list of the different offsetting options.
 
-### `offset/offset`
+### `/offset/offset`
 
 *POST*
 
@@ -75,7 +116,7 @@ Here, `offset_amount` is the amount of carbon being offset.
 ```
 If `transaction_id` is 0, then that means that the offsetting transaction has failed, and all other fields are undefined. Here, `carbon_cost_offset` would always be negative.
 
-### `transaction/update`
+### `/transaction/update`
 
 *POST*
 
@@ -95,7 +136,7 @@ If `transaction_id` is 0, then that means that the offsetting transaction has fa
 ```
 Carbon offsetting transactions may NOT be updated, hence `carbon_cost_offset` would always be positive.
 
-### `transaction/update_products`
+### `/transaction/update_products`
 
 *POST*
 
@@ -120,3 +161,4 @@ Carbon offsetting transactions may NOT be updated, hence `carbon_cost_offset` wo
 	"success": true/false
 }
 ```
+
