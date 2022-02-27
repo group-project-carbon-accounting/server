@@ -2,18 +2,36 @@ import asyncio
 import json
 import time
 import tornado.web, tornado.ioloop
-from handlers.async_fetch import async_fetch, GET, POST, async_get_product_data
+from handlers.async_fetch import async_fetch, GET, POST, async_get_product_data, async_get_product_info
+from offset_handlers import OFFSET_OPTIONS
 
 class TransactionGetHandler(tornado.web.RequestHandler):
     async def get(self, transaction_id):
         response_data = await async_fetch('/purchase/get/' + transaction_id, GET)
 
+        products = []
+        if response_data['item_list']:
+            if response_data['carbon_cost'] < 0:
+                products.append({'company_name': next(offset_option[1] for offset_option in OFFSET_OPTIONS
+                                                      if offset_option[0] == response_data['selr_id']),
+                                 'product_name': 'carbon offset'})
+            else:
+                product_tasks = [asyncio.create_task(async_get_product_info(ids, products))
+                                 for ids in response_data['item_list']]
+                try:
+                    await asyncio.gather(*product_tasks)
+                except Exception:
+                    for task in product_tasks:
+                        task.cancel()
+                    self.write(json.dumps({'timestamp': 0}))
+                    return
+
         data = {
-            'transaction_id': response_data['id'],
             'price': response_data['price'],
             'carbon_cost_offset': response_data['carbon_cost'],
             'vendor': response_data['selr_id'],
-            'timestamp': response_data['ts']
+            'timestamp': response_data['ts'],
+            'products': products
         }
         self.write(json.dumps(data))
 
@@ -89,11 +107,14 @@ class TransactionUpdateProductsHandler(tornado.web.RequestHandler):
             self.write(json.dumps({'success': False}))
         else:
             carbon_cost = [0]
-            product_tasks = [async_get_product_data(product, carbon_cost) for product in request_data['products']]
+            product_tasks = [asyncio.create_task(async_get_product_data(product, carbon_cost))
+                             for product in request_data['products']]
             try:
                 # if any product is an offsetting one, raise Exception
-                await asyncio.gather(product_tasks)
+                await asyncio.gather(*product_tasks)
             except Exception:
+                for task in product_tasks:
+                    task.cancel()
                 self.write(json.dumps({'success': False}))
             else:
                 products = [{'prod_id': product['product_id'], 'comp_id': product['company_id']}

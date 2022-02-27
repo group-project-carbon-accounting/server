@@ -10,10 +10,13 @@ class PaymentProcessHandler(tornado.web.RequestHandler):
 
         carbon_cost = [0]
         if 'products' in request_data:
-            product_tasks = [async_get_product_data(product, carbon_cost) for product in request_data['products']]
+            product_tasks = [asyncio.create_task(async_get_product_data(product, carbon_cost))
+                             for product in request_data['products']]
             try:
-                await asyncio.gather(product_tasks)
+                await asyncio.gather(*product_tasks)
             except Exception:
+                for task in product_tasks:
+                    task.cancel()
                 self.write(json.dumps({'success': False}))
                 return
         elif 'carbon_cost' in request_data:

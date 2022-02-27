@@ -27,3 +27,8 @@ async def async_get_offset_options(offset_company_id, offset_description, offset
         'description': offset_description,
         'price': product_data['carbon_cost']
     }
+
+async def async_get_product_info(ids, products):
+    product_data = await async_fetch('/product/get/' + str(ids['prod_id']), GET)
+    company_data = await async_fetch('/entity/get/' + str(ids['comp_id']), GET)
+    products.append({'company_name': company_data['display_name'], 'product_name': product_data['item_name']})
