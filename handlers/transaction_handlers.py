@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import json
 import time
 import tornado.web, tornado.ioloop
@@ -29,8 +30,8 @@ class TransactionGetHandler(tornado.web.RequestHandler):
         data = {
             'price': response_data['price'],
             'carbon_cost_offset': response_data['carbon_cost'],
-            'vendor': response_data['selr_id'],
-            'timestamp': response_data['ts'],
+            'vendor': (await async_fetch('/entity/get/' + str(response_data['selr_id']), GET))['display_name'],
+            'timestamp': datetime.datetime.fromtimestamp(response_data['ts']).strftime('%a, %e %b %Y, %H:%M:%S'),
             'products': products
         }
         self.write(json.dumps(data))
@@ -49,6 +50,7 @@ class TransactionGetRecentHandler(tornado.web.RequestHandler):
             'carbon_offset': 0,
             'transactions': []
         }
+
         for purchase in response_data['purchase_list']:
             c = purchase['carbon_cost']
             if c >= 0:
@@ -59,9 +61,9 @@ class TransactionGetRecentHandler(tornado.web.RequestHandler):
                 'transaction_id': purchase['id'],
                 'price': purchase['price'],
                 'carbon_cost_offset': purchase['carbon_cost'],
-                # TODO: query database to see what's the name of the vendor corresponding to that selr_id
-                'vendor': purchase['selr_id'],
-                'timestamp': int(purchase['ts'])
+                # TODO: change this into a list of tasks
+                'vendor': (await async_fetch('/entity/get/' + str(purchase['selr_id']), GET))['display_name'],
+                'timestamp': datetime.datetime.fromtimestamp(purchase['ts']).strftime('%a, %e %b %Y, %H:%M:%S')
             })
         self.write(json.dumps(data))
 
