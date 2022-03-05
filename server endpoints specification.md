@@ -2,7 +2,7 @@
 
 ## Testing endpoints
 
-### `/test/{test_val}
+### `/test/{test_val}`
 
 *GET*
 
@@ -17,17 +17,17 @@ This is used to test the GET functionality, where the test value is echoed back 
 **Request**:
 ```json
 {
-	"test": *
+	"test": {test_val}
 }
 ```
 
-**Response**: `*`
+**Response**: `test_val`
 
 This is used to test the POST functionality, where the test value is echoed back plainly, not in a JSON format.
 
 ## Payment endpoints
 
-### `/payment/`
+### `/payment`
 
 *POST*
 
@@ -102,7 +102,7 @@ The vendor bank can use either `products` list or the `carbon_cost` field. If bo
 }
 ```
 
-### `/product/get/{company_id}/{product_id}
+### `/product/get/{company_id}/{product_id}`
 
 *GET*
 
