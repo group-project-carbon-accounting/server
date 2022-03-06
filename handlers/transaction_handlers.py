@@ -4,7 +4,7 @@ import json
 import time
 import tornado.web, tornado.ioloop
 from handlers.async_fetch import async_fetch, GET, POST, async_get_product_data, async_get_product_info
-from offset_handlers import OFFSET_OPTIONS
+from handlers.offset_handlers import OFFSET_OPTIONS
 
 class TransactionGetHandler(tornado.web.RequestHandler):
     async def get(self, transaction_id):
