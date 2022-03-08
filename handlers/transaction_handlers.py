@@ -31,7 +31,7 @@ class TransactionGetHandler(tornado.web.RequestHandler):
             'price': response_data['price'],
             'carbon_cost_offset': response_data['carbon_cost'],
             'vendor': (await async_fetch('/entity/get/' + str(response_data['selr_id']), GET))['display_name'],
-            'timestamp': datetime.datetime.fromtimestamp(response_data['ts']).strftime('%a, %e %b %Y, %H:%M:%S'),
+            'timestamp': datetime.datetime.fromtimestamp(response_data['ts']).strftime('%a, %d %b %Y, %H:%M:%S'),
             'products': products
         }
         self.write(json.dumps(data))

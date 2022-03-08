@@ -2,11 +2,10 @@ import unittest
 import json
 import tornado.testing
 import tornado.web
-import main
-from .. import handlers
-from handlers import user_handlers, offset_handlers, payment_handlers, product_handlers, transaction_handlers
-from server.main import TestHandler, user_handlers, offset_handlers, payment_handlers, product_handlers, transaction_handlers
-
+from handlers.user_handlers import GetEntityHandler
+from handlers.product_handlers import AddProductHandler, GetProductHandler, UpdateProductHandler
+from main import MainHandler, AddTransactionHandler, GetTransactionHandler, UpdateTransactionHandler
+from handlers.transaction_handlers import TransactionGetRecentHandler
 
 class Test(tornado.testing.AsyncHTTPTestCase):
     def get_app(self):

@@ -25,7 +25,7 @@ class PaymentProcessHandler(tornado.web.RequestHandler):
         transaction_data = await async_fetch('/purchase/add', POST, data={
             'buyr_id': request_data['user_id'],
             'selr_id': request_data['vendor_id'],
-            'price': request_data['amount'],
+            'price': request_data['price'],
             'carbon_cost': carbon_cost[0],
             'item_list': [{'prod_id': product['product_id'], 'comp_id': product['company_id']}
                           for product in request_data['products']] if 'products' in request_data else None
